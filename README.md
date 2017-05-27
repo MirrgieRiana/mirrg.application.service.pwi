@@ -1,10 +1,10 @@
-# titanium.solar
+# mirrg.application.service.pwi
 
-- Repo: `https://raw.githubusercontent.com/MirrgieRiana/titanium.solar/master/maven`
+- Repo: `https://raw.githubusercontent.com/MirrgieRiana/mirrg.application.service.pwi/master/maven`
 - Artifacts
-  - `mirrg:titanium.solar:+`
+  - `mirrg:mirrg.application.service.pwi:+`
 
-## titanium.solar
+## mirrg.application.service.pwi
 
 ### 説明
 
@@ -12,7 +12,7 @@
 
 ### エントリーポイント
 
-- `titanium.solar.Main`
+- `mirrg.application.service.pwi.Main`
 
 ### 機能
 
