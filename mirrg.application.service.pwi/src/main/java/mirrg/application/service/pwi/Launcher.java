@@ -82,6 +82,7 @@ public class Launcher
 			}
 			Thread thread = Thread.currentThread();
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				logger.log("Stopping...");
 				restartable = false;
 				Optional<Runner> oRunner2 = oRunner;
 				if (oRunner2.isPresent()) {
