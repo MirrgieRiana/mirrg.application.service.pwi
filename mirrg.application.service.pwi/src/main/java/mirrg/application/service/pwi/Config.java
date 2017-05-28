@@ -16,6 +16,7 @@ public class Config
 	public static class ConfigWeb
 	{
 
+		public String homeDirectory;
 		public String hostname;
 		public int port;
 		public int backlog;

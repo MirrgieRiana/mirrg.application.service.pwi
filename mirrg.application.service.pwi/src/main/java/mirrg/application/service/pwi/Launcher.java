@@ -42,6 +42,7 @@ public class Launcher
 			config.logCount = properties.getAsInt("logCount");
 
 			config.useWeb = properties.getAsBoolean("useWeb");
+			config.web.homeDirectory = properties.get("web.homeDirectory");
 			config.web.hostname = properties.get("web.hostname");
 			config.web.port = properties.getAsInt("web.port");
 			config.web.backlog = properties.getAsInt("web.backlog");

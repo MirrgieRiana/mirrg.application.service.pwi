@@ -49,9 +49,10 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 		{
 			HttpContext context = httpServer.createContext("/", e -> {
 
-				if (e.getRequestURI().getPath().toString().matches("/api(|/.*)")) {
+				String path = e.getRequestURI().getPath();
+				if (path.toString().matches("/api(|/.*)")) {
 
-					if (e.getRequestURI().getPath().toString().matches("/api/log")) {
+					if (path.toString().matches("/api/log")) {
 						send(e, String.format(
 							"<table style='font-family: monospace; white-space: nowrap;'>%s</table>",
 							lineStorage.stream()
@@ -62,9 +63,9 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 									t.right.source.name,
 									t.right.text))
 								.collect(Collectors.joining())));
-					} else if (e.getRequestURI().getPath().toString().matches("/api/log/count")) {
+					} else if (path.toString().matches("/api/log/count")) {
 						send(e, "" + lineStorage.getCount());
-					} else if (e.getRequestURI().getPath().toString().matches("/api/send")) {
+					} else if (path.toString().matches("/api/send")) {
 						String query = e.getRequestURI().getQuery();
 						if (query == null) {
 							send(e, 400, "400");
@@ -75,16 +76,16 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 
 							send(e, "Success[" + query + "]");
 						}
-					} else if (e.getRequestURI().getPath().toString().matches("/api/settings.js")) {
-						sendFile(e, new File("settings.js").toURI().toURL());
 					} else {
 						send(e, 404, "404");
 					}
 
-				} else if (e.getRequestURI().getPath().toString().matches("/")) {
+				} else if (path.toString().matches("/")) {
 					redirect(e, "/index.html");
+				} else if (!path.contains("/..")) {
+					sendFile(e, new File(config.homeDirectory, path).toURI().toURL());
 				} else {
-					sendFile(e, LineDispatcherWebInterface.class.getResource("html" + e.getRequestURI().getPath()));
+					send(e, 404, "404");
 				}
 
 			});
