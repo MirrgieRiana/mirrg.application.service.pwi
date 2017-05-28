@@ -162,7 +162,9 @@ public class Launcher
 		{
 
 			// open
-			Process process = new ProcessBuilder(command).start();
+			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			processBuilder.directory(new File(currentDirectory));
+			Process process = processBuilder.start();
 			PrintStream stdin = new PrintStream(process.getOutputStream(), true, encoding);
 			BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getInputStream(), encoding));
 			BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding));
