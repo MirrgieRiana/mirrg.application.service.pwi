@@ -60,6 +60,7 @@ public class Launcher
 	}
 
 	public Optional<Runner> oRunner = Optional.empty();
+	private volatile boolean restartable = true;
 
 	public void start() throws Exception
 	{
@@ -79,6 +80,22 @@ public class Launcher
 					config.web,
 					lineStorage).start();
 			}
+			Thread thread = Thread.currentThread();
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				restartable = false;
+				Optional<Runner> oRunner2 = oRunner;
+				if (oRunner2.isPresent()) {
+					Optional<Process> oProcess = oRunner2.get().oProcess;
+					if (oProcess.isPresent()) {
+						oProcess.get().destroy();
+					}
+				}
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}));
 		}
 
 		// loop
@@ -133,7 +150,7 @@ public class Launcher
 				logger.log("Stopped");
 			}
 
-			if (!config.restart) break;
+			if (!(restartable && config.restart)) break;
 		}
 	}
 
@@ -146,8 +163,9 @@ public class Launcher
 		public String[] command;
 		public String currentDirectory;
 		public String encoding;
-
 		private PrintStream outLog;
+
+		public Optional<Process> oProcess = Optional.empty();
 
 		public Runner(String sessionId, String[] command, String currentDirectory, String encoding, PrintStream outLog)
 		{
@@ -165,6 +183,7 @@ public class Launcher
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
 			processBuilder.directory(new File(currentDirectory));
 			Process process = processBuilder.start();
+			oProcess = Optional.of(process);
 			PrintStream stdin = new PrintStream(process.getOutputStream(), true, encoding);
 			BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getInputStream(), encoding));
 			BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding));
@@ -211,6 +230,7 @@ public class Launcher
 
 			// wait
 			process.waitFor();
+			oProcess = Optional.empty();
 
 			// dispose
 			a.stop();

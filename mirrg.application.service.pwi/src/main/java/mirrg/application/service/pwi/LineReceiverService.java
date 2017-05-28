@@ -1,5 +1,8 @@
 package mirrg.application.service.pwi;
 
+import java.util.Optional;
+
+import mirrg.application.service.pwi.Launcher.Runner;
 import mirrg.application.service.pwi.core.ILineReceiver;
 import mirrg.application.service.pwi.core.Line;
 import mirrg.application.service.pwi.core.LineBuffer;
@@ -36,10 +39,20 @@ public class LineReceiverService implements ILineReceiver
 				logger.log("Changed");
 			} else if (line.text.equals("/get sessionId")) {
 				logger.log(launcher.oRunner.map(r -> r.sessionId).orElse(""));
+			} else if (line.text.equals("/exit")) {
+				Optional<Runner> oRunner = launcher.oRunner;
+				if (oRunner.isPresent()) {
+					Optional<Process> oProcess = oRunner.get().oProcess;
+					if (oProcess.isPresent()) {
+						oProcess.get().destroy();
+						logger.log("Exit");
+					}
+				}
 			} else if (line.text.equals("/help")) {
 				logger.log("/set restart true");
 				logger.log("/set restart false");
 				logger.log("/get sessionId");
+				logger.log("/exit");
 				logger.log("/help");
 			} else if (line.text.startsWith("//")) {
 				in.push(new Line(line.source, line.text.substring(1), line.time));

@@ -6,3 +6,4 @@ backup/
 */build/
 */.classpath
 mirrg.application.service.pwi/log/
+mirrg.application.service.pwi/log-*.txt
