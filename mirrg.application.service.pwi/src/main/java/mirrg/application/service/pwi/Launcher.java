@@ -37,6 +37,7 @@ public class Launcher
 			config.command = properties.get("command");
 			config.currentDirectory = properties.get("currentDirectory");
 			config.encoding = properties.get("encoding");
+			config.logFileName = properties.get("logFileName");
 
 			config.restart = properties.getAsBoolean("restart");
 			config.logCount = properties.getAsInt("logCount");
@@ -101,7 +102,8 @@ public class Launcher
 					.map(s -> s.replace("%s", currentDirectory))
 					.toArray(String[]::new);
 				new File(currentDirectory).mkdirs();
-				PrintStream outLog = new PrintStream(new FileOutputStream(new File(currentDirectory, "log.txt")), true);
+				String logFileName = config.logFileName.replace("%s", sessionId);
+				PrintStream outLog = new PrintStream(new FileOutputStream(new File(currentDirectory, logFileName)), true);
 				logger.log(String.format("Session Id: %s, Command: %s, Current Directory: %s",
 					sessionId,
 					String.join(" ", command),

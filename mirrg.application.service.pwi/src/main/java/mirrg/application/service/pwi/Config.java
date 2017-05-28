@@ -6,6 +6,7 @@ public class Config
 	public String command;
 	public String currentDirectory;
 	public String encoding;
+	public String logFileName;
 
 	public boolean restart;
 	public int logCount;
