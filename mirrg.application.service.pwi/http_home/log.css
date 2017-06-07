@@ -8,6 +8,10 @@ table {
 	font-size: 12px;
 }
 
+.username {
+	text-align: center;
+}
+
 .id {
 	color: black;
 }

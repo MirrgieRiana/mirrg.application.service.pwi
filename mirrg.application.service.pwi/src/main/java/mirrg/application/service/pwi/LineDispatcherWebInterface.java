@@ -57,7 +57,7 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 
 					if (path.toString().matches("/api/log")) {
 						send(e, String.format(
-							"<link rel='stylesheet' href='/log.css'><table>%s</table>",
+							"<link rel='stylesheet' href='/log.css'><div class='username'>" + e.getPrincipal().getUsername() + "</div><table>%s</table>",
 							lineStorage.stream()
 								.map(t -> String.format(
 									"<tr style=\"color: %s;\"><td class='id'>%s</td><td class='time'>[%s]</td><td class='source'><b>%s</b></td><td class='text'>%s</td></tr>",
@@ -76,7 +76,7 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 						} else {
 
 							logger.log("Access: " + e.getRequestURI() + " " + e.getRemoteAddress());
-							receiver.onLine(logger, new Line(source, query));
+							receiver.onLine(logger, new Line(new LineSource(source.name + "(" + e.getPrincipal().getUsername() + ")", source.color), query));
 
 							send(e, "Success[" + query + "]");
 						}
@@ -95,11 +95,10 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 			});
 			if (config.needAuthentication) {
 				context.setAuthenticator(new BasicAuthenticator("Controller") {
-
 					@Override
 					public boolean checkCredentials(String arg0, String arg1)
 					{
-						if (!config.user.equals(arg0)) return false;
+						if (!arg0.matches(config.user)) return false;
 						if (!config.password.equals(arg1)) return false;
 						return true;
 					}
