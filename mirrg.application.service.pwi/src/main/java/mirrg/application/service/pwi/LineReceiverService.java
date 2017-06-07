@@ -40,20 +40,31 @@ public class LineReceiverService implements ILineReceiver
 			} else if (line.text.equals("/get sessionId")) {
 				logger.log(launcher.oRunner.map(r -> r.sessionId).orElse(""));
 			} else if (line.text.equals("/exit")) {
+				launcher.config.restart = false;
 				Optional<Runner> oRunner = launcher.oRunner;
 				if (oRunner.isPresent()) {
 					Optional<Process> oProcess = oRunner.get().oProcess;
 					if (oProcess.isPresent()) {
+						logger.log("Stopping");
 						oProcess.get().destroy();
-						logger.log("Exit");
+					}
+				}
+			} else if (line.text.equals("/stop")) {
+				Optional<Runner> oRunner = launcher.oRunner;
+				if (oRunner.isPresent()) {
+					Optional<Process> oProcess = oRunner.get().oProcess;
+					if (oProcess.isPresent()) {
+						logger.log("Stopping");
+						oProcess.get().destroy();
 					}
 				}
 			} else if (line.text.equals("/help")) {
-				logger.log("/set restart true");
-				logger.log("/set restart false");
-				logger.log("/get sessionId");
-				logger.log("/exit");
-				logger.log("/help");
+				logger.log("/set restart true　　　プロセスの再起動を許可します。");
+				logger.log("/set restart false　　　プロセスの再起動を不許可にします。");
+				logger.log("/get sessionId　　　現在のプロセスのセッションIDを表示します。");
+				logger.log("/exit　　　現在のプロセスを終了し、サービスを終了します。");
+				logger.log("/stop　　　現在のプロセスを終了し、必要であれば再起動します。");
+				logger.log("/help　　　このメッセージを表示します。");
 			} else if (line.text.startsWith("//")) {
 				in.push(new Line(line.source, line.text.substring(1), line.time));
 			} else {
