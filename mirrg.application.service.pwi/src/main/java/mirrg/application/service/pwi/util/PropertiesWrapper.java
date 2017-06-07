@@ -2,74 +2,56 @@ package mirrg.application.service.pwi.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PropertiesWrapper
 {
 
-	public Properties properties;
+	private Properties properties;
 
 	public PropertiesWrapper(Properties properties)
 	{
 		this.properties = properties;
 	}
 
-	public String get(String key)
+	public String getAsString(String key)
 	{
 		return properties.getProperty(key);
 	}
 
 	public int getAsInt(String key)
 	{
-		return Integer.parseInt(properties.getProperty(key), 10);
+		return Integer.parseInt(getAsString(key), 10);
 	}
 
 	public double getAsDouble(String key)
 	{
-		return Double.parseDouble(properties.getProperty(key));
+		return Double.parseDouble(getAsString(key));
 	}
 
 	public boolean getAsBoolean(String key)
 	{
-		return Boolean.parseBoolean(properties.getProperty(key));
+		return Boolean.parseBoolean(getAsString(key));
 	}
 
-	public static PropertiesWrapper create(String defaultPropertyFileName, String propertyFileNameSuffix, String... args) throws FileNotFoundException, IOException
+	public static Properties loadPropertiesWithParent(Properties properties, File directory, String propertyFileNameSuffix) throws IOException
 	{
-		ArrayList<String> args2 = Stream.of(args).collect(Collectors.toCollection(ArrayList::new));
-
-		//
-
-		String propertyFileName = defaultPropertyFileName;
-		Properties properties2 = new Properties();
-
-		for (String arg : args2) {
-
-			int index = arg.indexOf("=");
-			if (index >= 0) {
-				properties2.setProperty(arg.substring(0, index), arg.substring(index + 1));
-				continue;
-			}
-
-			if (!arg.isEmpty()) {
-				propertyFileName = arg;
-				continue;
-			}
-
+		String parent = properties.getProperty("parent");
+		if (parent != null && !parent.isEmpty()) {
+			if (!new File(directory, parent).isFile()) parent += propertyFileNameSuffix;
+			Properties properties2 = new Properties(loadPropertiesWithParent(new File(directory, parent), propertyFileNameSuffix));
+			properties2.putAll(properties);
+			return properties2;
 		}
+		return properties;
+	}
 
-		//
-
+	public static Properties loadPropertiesWithParent(File file, String propertyFileNameSuffix) throws IOException
+	{
 		Properties properties = new Properties();
-		if (!new File(propertyFileName).exists()) propertyFileName += propertyFileNameSuffix;
-		properties.load(new FileInputStream(new File(propertyFileName)));
-		properties.putAll(properties2);
-		return new PropertiesWrapper(properties);
+		properties.load(new FileInputStream(file));
+		return loadPropertiesWithParent(properties, file.getParentFile(), propertyFileNameSuffix);
 	}
 
 }

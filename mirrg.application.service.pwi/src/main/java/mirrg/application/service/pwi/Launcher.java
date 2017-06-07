@@ -34,22 +34,22 @@ public class Launcher
 
 		// read config
 		{
-			config.command = properties.get("command");
-			config.currentDirectory = properties.get("currentDirectory");
-			config.encoding = properties.get("encoding");
-			config.logFileName = properties.get("logFileName");
+			config.command = properties.getAsString("command");
+			config.currentDirectory = properties.getAsString("currentDirectory");
+			config.encoding = properties.getAsString("encoding");
+			config.logFileName = properties.getAsString("logFileName");
 
 			config.restart = properties.getAsBoolean("restart");
 			config.logCount = properties.getAsInt("logCount");
 
 			config.useWeb = properties.getAsBoolean("useWeb");
-			config.web.homeDirectory = properties.get("web.homeDirectory");
-			config.web.hostname = properties.get("web.hostname");
+			config.web.homeDirectory = properties.getAsString("web.homeDirectory");
+			config.web.hostname = properties.getAsString("web.hostname");
 			config.web.port = properties.getAsInt("web.port");
 			config.web.backlog = properties.getAsInt("web.backlog");
 			config.web.needAuthentication = properties.getAsBoolean("web.needAuthentication");
-			config.web.user = properties.get("web.user");
-			config.web.password = properties.get("web.password");
+			config.web.user = properties.getAsString("web.user");
+			config.web.password = properties.getAsString("web.password");
 		}
 
 		in = new LineBuffer();
