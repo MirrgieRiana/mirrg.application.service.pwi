@@ -8,6 +8,11 @@ var buttons = [ {
 		send("/help");
 	}
 }, {
+	value : "stop",
+	action : function(send) {
+		send("stop");
+	}
+}, {
 	value : "Restart On",
 	action : function(send) {
 		send("/set restart true");
