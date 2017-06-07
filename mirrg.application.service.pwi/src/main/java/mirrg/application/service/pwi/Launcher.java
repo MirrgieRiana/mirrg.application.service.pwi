@@ -111,9 +111,34 @@ public class Launcher
 	{
 		try (LogWriter logWriter = new LogWriter()) {
 
+			ILineDispatcher b;
+			try {
+				b = new LineDispatcherBuffer(logger, new ILineReceiver() {
+
+					@Override
+					public void onLine(Line line) throws Exception
+					{
+						lineStorage.push(line);
+
+						String text = String.format("[%s] [%s] %s", line.time.format(FORMATTER_LOG), line.source.name, line.text);
+						System.out.println(text);
+						logWriter.println(text);
+					}
+
+					@Override
+					public void onClosed(LineSource source) throws Exception
+					{
+
+					}
+
+				}, out).start();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+
 			while (true) {
 
-				logger.log("Starting...");
 				try {
 
 					String sessionId = createSessionId();
@@ -121,8 +146,10 @@ public class Launcher
 					String[] command = Stream.of(config.command.split(" +"))
 						.map(s -> s.replace("%s", currentDirectory))
 						.toArray(String[]::new);
+
 					new File(currentDirectory).mkdirs();
 					logWriter.setFile(new File(currentDirectory, config.logFileName.replace("%s", sessionId)));
+
 					logger.log(String.format("Session Id: %s, Command: %s, Current Directory: %s",
 						sessionId,
 						String.join(" ", command),
@@ -148,11 +175,16 @@ public class Launcher
 
 				} catch (Exception e) {
 					logger.log(e);
-				} finally {
-					logger.log("Stopped");
 				}
 
 				if (!(restartable && config.restart)) break;
+			}
+
+			try {
+				b.stop();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
 			}
 
 		}
@@ -208,25 +240,6 @@ public class Launcher
 				}
 
 			}, in).start();
-			ILineDispatcher b = new LineDispatcherBuffer(logger, new ILineReceiver() {
-
-				@Override
-				public void onLine(Line line) throws Exception
-				{
-					lineStorage.push(line);
-
-					String text = String.format("[%s] [%s] %s", line.time.format(FORMATTER_LOG), line.source.name, line.text);
-					System.out.println(text);
-					logWriter.println(text);
-				}
-
-				@Override
-				public void onClosed(LineSource source) throws Exception
-				{
-
-				}
-
-			}, out).start();
 
 			// start internal thread
 			ILineDispatcher c = new LineDispatcherInputStream(logger, new LineReceiverBuffor(out), new LineSource("STDOUT", "black"), stdout).start();
@@ -238,7 +251,6 @@ public class Launcher
 
 			// dispose
 			a.stop();
-			b.stop();
 			c.stop();
 			d.stop();
 
