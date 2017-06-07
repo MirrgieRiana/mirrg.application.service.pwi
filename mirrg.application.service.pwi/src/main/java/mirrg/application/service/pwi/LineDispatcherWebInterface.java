@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,8 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 		this.lineStorage = lineStorage;
 	}
 
+	public static final DateTimeFormatter FORMATTER_LOG = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
+
 	@Override
 	protected Thread createThread() throws Exception
 	{
@@ -54,12 +57,13 @@ public class LineDispatcherWebInterface extends LineDispatcherThreadBase
 
 					if (path.toString().matches("/api/log")) {
 						send(e, String.format(
-							"<table style='font-family: monospace; white-space: nowrap;'>%s</table>",
+							"<link rel='stylesheet' href='/log.css'><table>%s</table>",
 							lineStorage.stream()
 								.map(t -> String.format(
-									"<tr style=\"color: %s;\"><td>%s</td><td><b>%s</b></td><td>%s</td></tr>",
+									"<tr style=\"color: %s;\"><td class='id'>%s</td><td class='time'>[%s]</td><td class='source'><b>%s</b></td><td class='text'>%s</td></tr>",
 									t.right.source.color,
 									t.left,
+									t.right.time.format(FORMATTER_LOG),
 									t.right.source.name,
 									t.right.text))
 								.collect(Collectors.joining())));

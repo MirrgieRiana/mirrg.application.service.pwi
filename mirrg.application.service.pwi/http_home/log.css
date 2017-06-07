@@ -1,0 +1,13 @@
+body {
+	margin: 2px;
+}
+
+table {
+	font-family: monospace;
+	white-space: nowrap;
+	font-size: 12px;
+}
+
+.id {
+	color: black;
+}

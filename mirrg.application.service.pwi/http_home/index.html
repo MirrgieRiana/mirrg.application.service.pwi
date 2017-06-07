@@ -147,12 +147,27 @@ iframe {
 <body>
 	<table>
 		<tr style="height: 100%;">
-			<td colspan="2"><iframe id="frame" src="/api/log"> </iframe></td>
+			<td><iframe id="frame" src="/api/log"></iframe></td>
 		</tr>
-		<tr style="height: 0;">
-			<td><input type="button" value="更新" onclick='refreshForce();'> <input type="text" style="width: 300px;" id="command" value=""> <input type="button" value="送信"
-				onclick='submit()'> <span id="status"></span></td>
-			<td style="text-align: right;"><input type="checkbox" checked="checked" id="autoScroll"><label for="autoScroll">自動スクロール</label> <span id="buttons"></span> <span id="application_name"></span>
+		<tr style="height: 0%;">
+			<td>
+				<table>
+					<tr>
+						<td><input type="button" value="更新" onclick='refreshForce();'> <input type="text" style="width: 300px;" id="command" value=""> <input type="button" value="送信"
+							onclick='submit()'></td>
+						<td style="text-align: right;"><input type="checkbox" checked="checked" id="autoScroll"><label for="autoScroll">自動スクロール</label> <span id="buttons"></span></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="height: 0%;">
+			<td>
+				<table>
+					<tr>
+						<td><span id="status"></span></td>
+						<td style="text-align: right;"><span id="application_name"></span></td>
+					</tr>
+				</table>
 			</td>
 		</tr>
 	</table>

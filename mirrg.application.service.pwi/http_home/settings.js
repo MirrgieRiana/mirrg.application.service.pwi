@@ -7,4 +7,14 @@ var buttons = [ {
 	action : function(send) {
 		send("/help");
 	}
+}, {
+	value : "Restart On",
+	action : function(send) {
+		send("/set restart true");
+	}
+}, {
+	value : "Restart Off",
+	action : function(send) {
+		send("/set restart false");
+	}
 } ];
