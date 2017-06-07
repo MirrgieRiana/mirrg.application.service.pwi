@@ -20,27 +20,36 @@
 	}
 
 	function refreshImpl(force) {
-		$.get("/api/log/count", {}, function(data) {
-			if (force || lastLogs < data) {
-				lastLogs = data * 1;
+		$.ajax({
+			url : "/api/log/count",
+			success : function(data) {
+				if (force || lastLogs < data) {
+					lastLogs = data * 1;
 
-				// リロード
-				$("#frame")[0].contentDocument.location.reload(true);
+					// リロード
+					$("#frame")[0].contentDocument.location.reload(true);
 
-				// 自動スクロール
-				if ($("#autoScroll").prop('checked')) {
-					setTimeout(function() {
-						$("#frame").contents().scrollTop(99999);
-					}, 100);
-					//$("#frame").contents().ready();
+					// 自動スクロール
+					if ($("#autoScroll").prop('checked')) {
+						setTimeout(function() {
+							$("#frame").contents().scrollTop(99999);
+						}, 100);
+						//$("#frame").contents().ready();
+					}
 				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				setStatus("refresh error: " + textStatus);
 			}
 		});
 	}
 
 	function send(command) {
-		$.get("/api/send?" + command, {}, function(data) {
-			setTimeout(refresh, 200);
+		$.ajax({
+			url : "/api/send?" + command,
+			success : function(data) {
+				setTimeout(refresh, 200);
+			}
 		});
 		setStatus("send: " + command);
 	}
