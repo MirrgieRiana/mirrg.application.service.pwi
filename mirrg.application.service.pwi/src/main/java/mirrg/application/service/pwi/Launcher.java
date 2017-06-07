@@ -103,7 +103,7 @@ public class Launcher
 		loop();
 
 		// end
-		System.exit(0);
+		new Thread(() -> System.exit(0)).start();
 
 	}
 
