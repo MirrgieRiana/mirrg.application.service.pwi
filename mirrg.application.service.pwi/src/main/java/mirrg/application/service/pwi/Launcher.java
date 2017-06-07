@@ -2,7 +2,6 @@ package mirrg.application.service.pwi;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.time.LocalDateTime;
@@ -16,6 +15,7 @@ import mirrg.application.service.pwi.core.Line;
 import mirrg.application.service.pwi.core.LineBuffer;
 import mirrg.application.service.pwi.core.LineSource;
 import mirrg.application.service.pwi.core.LineStorage;
+import mirrg.application.service.pwi.core.LogWriter;
 import mirrg.application.service.pwi.core.Logger;
 import mirrg.application.service.pwi.util.PropertiesWrapper;
 
@@ -109,49 +109,52 @@ public class Launcher
 
 	private void loop()
 	{
-		while (true) {
+		try (LogWriter logWriter = new LogWriter()) {
 
-			logger.log("Starting...");
-			try {
+			while (true) {
 
-				String sessionId = createSessionId();
-				String currentDirectory = config.currentDirectory.replace("%s", sessionId);
-				String[] command = Stream.of(config.command.split(" +"))
-					.map(s -> s.replace("%s", currentDirectory))
-					.toArray(String[]::new);
-				new File(currentDirectory).mkdirs();
-				String logFileName = config.logFileName.replace("%s", sessionId);
-				PrintStream outLog = new PrintStream(new FileOutputStream(new File(currentDirectory, logFileName)), true);
-				logger.log(String.format("Session Id: %s, Command: %s, Current Directory: %s",
-					sessionId,
-					String.join(" ", command),
-					currentDirectory));
-
-				Runner runner = new Runner(
-					sessionId,
-					command,
-					currentDirectory,
-					config.encoding,
-					outLog);
-
-				oRunner = Optional.of(runner);
+				logger.log("Starting...");
 				try {
 
-					runner.run();
+					String sessionId = createSessionId();
+					String currentDirectory = config.currentDirectory.replace("%s", sessionId);
+					String[] command = Stream.of(config.command.split(" +"))
+						.map(s -> s.replace("%s", currentDirectory))
+						.toArray(String[]::new);
+					new File(currentDirectory).mkdirs();
+					logWriter.setFile(new File(currentDirectory, config.logFileName.replace("%s", sessionId)));
+					logger.log(String.format("Session Id: %s, Command: %s, Current Directory: %s",
+						sessionId,
+						String.join(" ", command),
+						currentDirectory));
+
+					Runner runner = new Runner(
+						sessionId,
+						command,
+						currentDirectory,
+						config.encoding,
+						logWriter);
+
+					oRunner = Optional.of(runner);
+					try {
+
+						runner.run();
+
+					} catch (Exception e) {
+						logger.log(e);
+					} finally {
+						oRunner = Optional.empty();
+					}
 
 				} catch (Exception e) {
 					logger.log(e);
 				} finally {
-					oRunner = Optional.empty();
+					logger.log("Stopped");
 				}
 
-			} catch (Exception e) {
-				logger.log(e);
-			} finally {
-				logger.log("Stopped");
+				if (!(restartable && config.restart)) break;
 			}
 
-			if (!(restartable && config.restart)) break;
 		}
 	}
 
@@ -164,17 +167,17 @@ public class Launcher
 		public String[] command;
 		public String currentDirectory;
 		public String encoding;
-		private PrintStream outLog;
+		private LogWriter logWriter;
 
 		public Optional<Process> oProcess = Optional.empty();
 
-		public Runner(String sessionId, String[] command, String currentDirectory, String encoding, PrintStream outLog)
+		public Runner(String sessionId, String[] command, String currentDirectory, String encoding, LogWriter logWriter)
 		{
 			this.sessionId = sessionId;
 			this.command = command;
 			this.currentDirectory = currentDirectory;
 			this.encoding = encoding;
-			this.outLog = outLog;
+			this.logWriter = logWriter;
 		}
 
 		public void run() throws Exception
@@ -214,7 +217,7 @@ public class Launcher
 
 					String text = String.format("[%s] [%s] %s", line.time.format(FORMATTER_LOG), line.source.name, line.text);
 					System.out.println(text);
-					outLog.println(text);
+					logWriter.println(text);
 				}
 
 				@Override
@@ -238,7 +241,6 @@ public class Launcher
 			b.stop();
 			c.stop();
 			d.stop();
-			outLog.close();
 
 		}
 
